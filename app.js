@@ -5,10 +5,8 @@ var cookieParser = require("cookie-parser");
 var logger = require("morgan");
 var debug = require("debug")("my-application");
 
-
-var indexRouter = require("./routes/index");
-var usersRouter = require("./routes/users");
 let redis = require("./routes/redis.js");
+let lb = require("./routes/lb");
 
 var app = express();
 app.set("port", 3000);
@@ -32,9 +30,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use("/", indexRouter);
-app.use("/users", usersRouter);
-app.use("/redis", redis);
+app.use("/tredis/v1/api", redis);
+app.use("/tlb/v1/api", lb);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
