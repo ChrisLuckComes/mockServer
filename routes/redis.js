@@ -1,28 +1,60 @@
 let router = require("express").Router();
-let db = require("../dataStore").redis;
+let client = require("../dbConfig");
+let db, instance
 
-db.loadDatabase();
+client.connect((err, c) => {
+  if (err) {
+    console.log(err);
+  } else {
+    db = c.db("redis");
+    instance = db.collection("instance");
+  }
+});
 
-router.post("/getInstanceList", (req, res, next) => {
-  let area = req.body.area;
-  let page = req.body.page - 1;
-  let pageSize = req.body.pageSize;
-  db.find(
-    { instanceList: { area: area } }.skip(page * pageSize).limit(pageSize)
-  ).exec((err, docs) => {
-    if (err) {
-      // console.log(err);
-      // res.end({ code: 1001, msg: "fail" });
-      next(err)
+router.get("/instances", (req, res, next) => {
+  let area = req.query.area;
+  let system = req.query.system;
+  let page = req.query.page - 1;
+  let pageSize = +req.query.pageSize;
+
+  let query = {
+    area: area
+  };
+  if (system) {
+    query.system = system;
+  }
+
+  instance
+    .find(query)
+    .skip(page * pageSize)
+    .limit(pageSize)
+    .toArray(function(err, docs) {
+      if (err) {
+        console.log(err);
+        res.send({ code: 1001, message: "fail" });
+      } else {
+        res.send({
+          code: 1000,
+          data: docs
+        });
+      }
+    });
+});
+
+router.put("/instances", (req, res, next) => {
+  console.log(req.query)
+  instance.updateOne(
+    { instanceId: req.query.instanceId },
+    { $set: { storageLimit: req.query.storageLimit } },
+    (err, doc) => {
+      if (err) {
+        res.send({ code: 1001, message: "扩容失败" });
+      } else {
+        res.send({ code: 1000, message: "扩容成功" });
+      }
     }
-    res.send({ code: 1000, data: docs });
-  });
+  );
 });
 
-router.post("/addInstance", (req, res, next) => {
-  console.log(req.body);
-  db.insert({ instanceList: { $push: req.body } });
-  res.send("Inserted:" + req.body.id);
-});
 
 module.exports = router;

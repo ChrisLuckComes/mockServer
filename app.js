@@ -7,6 +7,7 @@ var debug = require("debug")("my-application");
 
 let redis = require("./routes/redis.js");
 let lb = require("./routes/lb");
+let config = require("./routes/config");
 
 var app = express();
 app.set("port", 3000);
@@ -32,6 +33,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/tredis/v1/api", redis);
 app.use("/tlb/v1/api", lb);
+app.use("/tredis/v1/api/config", config);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

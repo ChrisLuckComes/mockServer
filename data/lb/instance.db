@@ -1,0 +1,1 @@
+{"id":"1","name":"IDC_MW_SZ_LB_WEB","system":"IDC-MW","startDate":"2018-05-09 18:00:35","endDate":"2020-05-09 18:00:35","subnet":"sf-subnet-01","vpc":"sfvpc-sz-01","vip":"123.77.65.52","bandwidth":"40","status":"运行中","area":"shenzhen","net":"sfvpc-sz-01-sf-subnet-01","package":"包年包月","port":"8080","_id":"FqbWNQSb4hMu6W2z"}

@@ -1,23 +1,6 @@
 let router = require("express").Router();
-// let instance = require("../dataStore").lb.instance;
-// let watcher = require("../dataStore").lb.watcher;
-// let os = require("../dataStore").os;
-// let watchData = require("../dataStore").lb.watchData;
-
-// instance.loadDatabase();
-// watcher.loadDatabase();
-// os.loadDatabase();
-// watchData.loadDatabase();
+let client = require("../dbConfig");
 let db, instance, watcher, os, os_watcher;
-const MongoClient = require("mongodb").MongoClient;
-const url = "mongodb://127.0.0.1:27017";
-const client = new MongoClient(url, {
-  useNewUrlParser: true,
-  autoReconnect: true,
-  poolSize: 10,
-  keepAlive: 1,
-  connectTimeoutMS: 30000
-});
 client.connect((err, c) => {
   if (err) {
     console.log(err);
@@ -157,7 +140,6 @@ router.put("/instances", (req, res, next) => {
       } else {
         res.send({ code: 1000, message: "带宽升级成功" });
       }
-      client.close();
     }
   );
 });
