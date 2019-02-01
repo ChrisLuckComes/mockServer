@@ -1,6 +1,6 @@
 let router = require("express").Router();
 let client = require("../dbConfig");
-let db, instance
+let db, instance, parameter;
 
 client.connect((err, c) => {
   if (err) {
@@ -8,6 +8,7 @@ client.connect((err, c) => {
   } else {
     db = c.db("redis");
     instance = db.collection("instance");
+    parameter = db.collection("parameter");
   }
 });
 
@@ -33,16 +34,17 @@ router.get("/instances", (req, res, next) => {
         console.log(err);
         res.send({ code: 1001, message: "fail" });
       } else {
-        res.send({
-          code: 1000,
-          data: docs
+        instance.countDocuments(function(err, count) {
+          res.send({
+            code: 1000,
+            data: { list: docs, count: count }
+          });
         });
       }
     });
 });
 
 router.put("/instances", (req, res, next) => {
-  console.log(req.query)
   instance.updateOne(
     { instanceId: req.query.instanceId },
     { $set: { storageLimit: req.query.storageLimit } },
@@ -56,5 +58,38 @@ router.put("/instances", (req, res, next) => {
   );
 });
 
+router.delete("/instances", (req, res) => {
+  instance.deleteOne({ instanceId: req.body.instanceId }, (err, doc) => {
+    if (err) {
+      res.send({ code: 1001, message: "删除失败" });
+    } else {
+      res.send({ code: 1000, message: "删除成功" });
+    }
+  });
+});
+
+router.get("/parameters", (req, res) => {
+  parameter.find({}).toArray((err, docs) => {
+    if (err) {
+      res.send({ code: 1001, message: "获取参数信息失败" });
+    } else {
+      res.send({ code: 1000, data: docs });
+    }
+  });
+});
+
+router.put("/parameters", (req, res) => {
+  parameter.updateOne(
+    { name: req.query.name },
+    { $set: { running: req.query.running } },
+    err => {
+      if (err) {
+        res.send({ code: 1001, message: "修改参数失败" });
+      } else {
+        res.send({ code: 1000, message: "修改成功" });
+      }
+    }
+  );
+});
 
 module.exports = router;
