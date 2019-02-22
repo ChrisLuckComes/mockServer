@@ -77,7 +77,7 @@ router.put("/os", (req, res, next) => {
 });
 
 router.delete("/os-watcher", (req, res, next) => {
-  console.log(req.body)
+  console.log(req.body);
   os_watcher.deleteOne(
     {
       ip: req.body.ip,
@@ -105,23 +105,25 @@ router.get("/instances", (req, res, next) => {
   if (system) {
     query.system = system;
   }
-
-  instance
-    .find(query)
-    .skip(page * pageSize)
-    .limit(pageSize)
-    .toArray(function(err, docs) {
-      console.log(docs);
-      if (err) {
-        console.log(err);
-        res.send({ code: 1001, message: "fail" });
-      } else {
-        res.send({
-          code: 1000,
-          data: docs
-        });
-      }
-    });
+  let count;
+  instance.countDocuments(query, (err, num) => {
+    count = num;
+    instance
+      .find(query)
+      .skip(page * pageSize)
+      .limit(pageSize)
+      .toArray(function(err, docs) {
+        if (err) {
+          console.log(err);
+          res.status(500).send({ status: 1001, message: "查询失败" });
+        } else {
+          res.send({
+            code: 1000,
+            data: { list: docs, count: count }
+          });
+        }
+      });
+  });
 });
 
 router.post("/instances", (req, res, next) => {
